@@ -2,61 +2,61 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Пошук нерухомості Житомирщина</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оцінка нерухомості Житомир</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f3; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; color: #7f8c8d; font-size: 14px; }
-        select, input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #dcdde1; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 15px; background: #00a8ff; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; transition: background 0.3s; }
-        button:hover { background: #0097e6; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
+        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #0088cc; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #0088cc; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0077b5; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h2>📊 Оцінка майна</h2>
+        
+        <label>Об'єкт:</label>
+        <select id="type">
+            <option value="prodazha-kvartir">🏢 Квартира</option>
+            <option value="prodazha-domov">🏡 Будинок / Дача</option>
+        </select>
 
-<div class="card">
-    <h2>🏠 Пошук Житла</h2>
-    
-    <label>Що шукаємо?</label>
-    <select id="realty_type">
-        <option value="prodazha-kvartir">🏢 Квартира</option>
-        <option value="prodazha-domov">🏡 Будинок</option>
-        <option value="prodazha-domov">⛺ Дача</option>
-    </select>
+        <label>Населений пункт (Житомирська обл.):</label>
+        <input type="text" id="town" placeholder="Наприклад: Березівка" required>
 
-    <label>Населений пункт (Житомирська обл.):</label>
-    <input type="text" id="location" placeholder="Наприклад: Коростишів" required>
+        <label>Ціна за м² ВІД (грн):</label>
+        <input type="number" id="min_p" placeholder="0">
 
-    <label>Ціна за м² ВІД (грн):</label>
-    <input type="number" id="min_price" value="0">
+        <label>Ціна за м² ДО (грн):</label>
+        <input type="number" id="max_p" placeholder="50000">
 
-    <label>Ціна за м² ДО (грн):</label>
-    <input type="number" id="max_price" value="100000">
+        <button onclick="search()">🔍 Знайти схожі об'єкти</button>
+    </div>
 
-    <button onclick="startSearch()">🔍 Знайти точно</button>
-</div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Розгортає вікно на весь екран
 
-<script>
-function startSearch() {
-    const type = document.getElementById('realty_type').value;
-    const loc = document.getElementById('location').value;
-    const min = document.getElementById('min_price').value;
-    const max = document.getElementById('max_price').value;
+        function search() {
+            const type = document.getElementById('type').value;
+            const town = document.getElementById('town').value;
+            const min = document.getElementById('min_p').value;
+            const max = document.getElementById('max_p').value;
 
-    if(!loc) { alert("Введіть місто або село!"); return; }
+            if (!town) { alert("Введіть населений пункт!"); return; }
 
-    // Формуємо пошуковий запит
-    let query = loc + " житомирська область";
-    const encodedQuery = encodeURIComponent(query);
+            const query = encodeURIComponent(`${town} житомирська область`);
+            
+            // Формуємо посилання на OLX з жорсткими фільтрами за м2
+            const url = `https://www.olx.ua/uk/nedvizhimost/${type}/zhitomirskaya-oblast/q-${query}/?search%5Bfilter_float_price_per_m2%3Afrom%5D=${min}&search%5Bfilter_float_price_per_m2%3Ato%5D=${max}`;
 
-    // Створюємо пряме посилання на OLX з фільтрами ціни за кв.м.
-    const url = `https://www.olx.ua/uk/nedvizhimost/${type}/zhitomirskaya-oblast/q-${encodedQuery}/?search%5Bfilter_float_price_per_m2%3Afrom%5D=${min}&search%5Bfilter_float_price_per_m2%3Ato%5D=${max}`;
-
-    // Відкриваємо в новій вкладці
-    window.open(url, '_blank');
-}
-</script>
-
+            // Відкриваємо посилання прямо в зовнішньому браузері
+            tg.openLink(url);
+        }
+    </script>
 </body>
 </html>
