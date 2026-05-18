@@ -1,68 +1,78 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Оцінка 2.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 15px; }
-        .box { background: #2d2d2d; padding: 20px; border-radius: 15px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; }
-        button { width: 100%; padding: 15px; background: #0088cc; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; margin-top: 10px; }
-        label { font-size: 14px; color: #aaa; }
+        body { font-family: sans-serif; background: #1c1c1c; color: white; padding: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #2b2b2b; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #0088cc; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 16px; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2 style="text-align:center">📊 Оцінка майна</h2>
-        
-        <label>Тип об'єкта:</label>
-        <select id="type">
-            <option value="prodazha-kvartir">🏢 Квартира</option>
-            <option value="prodazha-domov">🏡 Будинок</option>
+    <h3>🏠 Пошук нерухомості</h3>
+    
+    <div class="input-group">
+        <label>Що шукаємо?</label>
+        <select id="obj_type">
+            <option value="квартира">🏢 Квартира</option>
+            <option value="будинок">🏡 Будинок</option>
+            <option value="дача">⛺ Дача</option>
         </select>
-
-        <label>Населений пункт (Житомирська обл.):</label>
-        <input type="text" id="town" placeholder="Наприклад: Житомир" required>
-
-        <label>Кількість кімнат:</label>
-        <input type="number" id="rooms" placeholder="Наприклад: 2">
-
-        <label>Поверх:</label>
-        <input type="number" id="floor" placeholder="Наприклад: 5">
-
-        <div style="display:flex; gap:10px">
-            <div style="width:50%"><label>Ціна м² ВІД:</label><input type="number" id="min_p" placeholder="0"></div>
-            <div style="width:50%"><label>Ціна м² ДО:</label><input type="number" id="max_p" placeholder="100000"></div>
-        </div>
-
-        <button onclick="search()">🚀 ЗНАЙТИ АНАЛОГИ</button>
     </div>
+
+    <div class="input-group">
+        <label>Назва (місто/село/селище):</label>
+        <input type="text" id="loc" placeholder="Напр: Глибочиця або Коростишів">
+    </div>
+
+    <div class="input-group" style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+            <label>Кімнат:</label>
+            <input type="number" id="rooms" placeholder="2">
+        </div>
+        <div style="flex: 1;">
+            <label>Поверх:</label>
+            <input type="number" id="floor" placeholder="5">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Ціна за м² ВІД (грн):</label>
+        <input type="number" id="min_p" placeholder="0">
+    </div>
+
+    <div class="input-group">
+        <label>Ціна за м² ДО (грн):</label>
+        <input type="number" id="max_p" placeholder="50000">
+    </div>
+
+    <button onclick="sendDataToBot()">🔍 ЗНАЙТИ ОБ'ЄКТИ</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function search() {
-            const town = document.getElementById('town').value;
-            const type = document.getElementById('type').value;
-            const rooms = document.getElementById('rooms').value;
-            const floor = document.getElementById('floor').value;
-            const min = document.getElementById('min_p').value;
-            const max = document.getElementById('max_p').value;
+        function sendDataToBot() {
+            const data = {
+                type: document.getElementById('obj_type').value,
+                loc: document.getElementById('loc').value,
+                rooms: document.getElementById('rooms').value,
+                floor: document.getElementById('floor').value,
+                min: document.getElementById('min_p').value,
+                max: document.getElementById('max_p').value
+            };
 
-            if(!town) return alert("Введіть місто!");
+            if (!data.loc) {
+                alert("Введіть назву населеного пункту!");
+                return;
+            }
 
-            const q = encodeURIComponent(`${town} житомирська область`);
-            
-            // Формуємо лінк з усіма параметрами (поверх, кімнати, ціна м2)
-            let url = `https://www.olx.ua/uk/nedvizhimost/${type}/zhitomirskaya-oblast/q-${q}/?search%5Bfilter_float_price_per_m2%3Afrom%5D=${min}&search%5Bfilter_float_price_per_m2%3Ato%5D=${max}`;
-            
-            if(rooms) url += `&search%5Bfilter_enum_number_of_rooms%5D%5B0%5D=${rooms}`;
-            if(floor) url += `&search%5Bfilter_float_floor%3Afrom%5D=${floor}&search%5Bfilter_float_floor%3Ato%5D=${floor}`;
-
-            tg.openLink(url);
+            // Це відправляє дані в Python-файл
+            tg.sendData(JSON.stringify(data));
         }
     </script>
 </body>
