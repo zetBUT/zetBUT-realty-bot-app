@@ -1,41 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background: #1c2733; color: white; padding: 20px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #2c3b4a; color: white; }
-        button { width: 100%; padding: 15px; background: #248bcf; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; padding: 15px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #334155; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #38bdf8; color: #0f172a; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .calc-box { margin-top: 15px; padding-top: 15px; border-top: 1px solid #334155; }
+        .result { font-size: 20px; color: #38bdf8; text-align: center; font-weight: bold; margin: 10px 0; }
     </style>
 </head>
 <body>
-    <h2>📊 Параметри оцінки</h2>
-    <label>Місто/Село:</label>
-    <input type="text" id="city" placeholder="Напр: Житомир">
-    
-    <label>Тип об'єкта:</label>
-    <select id="type">
-        <option value="квартира">Квартира</option>
-        <option value="будинок">Будинок</option>
-    </select>
+    <div class="card">
+        <h3>🏠 Пошук та Оцінка</h3>
+        <input type="text" id="city" placeholder="Населений пункт (Житомир...)">
+        <select id="type">
+            <option value="квартира">Квартира</option>
+            <option value="будинок">Будинок</option>
+        </select>
+        
+        <div class="calc-box">
+            <h4>🧮 Калькулятор вартості</h4>
+            <input type="number" id="area" placeholder="Площа м²" oninput="calc()">
+            <input type="number" id="price_per_m" placeholder="Ціна за м² $" oninput="calc()">
+            <div class="result" id="total_res">Разом: 0 $</div>
+        </div>
 
-    <label>Ціна за м² ($):</label>
-    <input type="number" id="price" placeholder="700">
-
-    <button onclick="send()">ШУКАТИ</button>
+        <button onclick="sendData()">🔍 ЗНАЙТИ ТА ПЕРЕВІРИТИ</button>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        function send() {
+
+        function calc() {
+            let area = document.getElementById("area").value;
+            let prm = document.getElementById("price_per_m").value;
+            let res = area * prm;
+            document.getElementById("total_res").innerText = "Разом: " + res.toLocaleString() + " $";
+        }
+
+        function sendData() {
             let data = {
                 city: document.getElementById("city").value,
                 type: document.getElementById("type").value,
-                price: document.getElementById("price").value
+                price: document.getElementById("price_per_m").value,
+                area: document.getElementById("area").value
             };
-            tg.sendData(JSON.stringify(data)); // Відправляє дані боту
+            tg.sendData(JSON.stringify(data));
         }
     </script>
 </body>
-</html>ы
+</html>
